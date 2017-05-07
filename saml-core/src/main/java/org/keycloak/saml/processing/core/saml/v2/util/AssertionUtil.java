@@ -272,24 +272,21 @@ public class AssertionUtil {
      * @param assertionElement
      * @param publicKey the {@link PublicKey}
      *
-     * @return
+     * @return true if signature is valid
      */
     public static boolean isSignatureValid(Element assertionElement, PublicKey publicKey) {
-        try {
-            Document doc = DocumentUtil.createDocument();
-            Node n = doc.importNode(assertionElement, true);
-            doc.appendChild(n);
-
-            return new SAML2Signature().validate(doc, new HardcodedKeyLocator(publicKey));
-        } catch (Exception e) {
-            logger.signatureAssertionValidationError(e);
-        }
-        return false;
+        return isSignatureValid(assertionElement, new HardcodedKeyLocator(publicKey));
     }
 
     /**
-     * Given an assertion element, validate the signature.
+     * Given an assertion element, validate the signature
+     *
+     * @param assertionElement
+     * @param keyLocator the {@link KeyLocator}
+     *
+     * @return true if signature is valid
      */
+    
     public static boolean isSignatureValid(Element assertionElement, KeyLocator keyLocator) {
         try {
             Document doc = DocumentUtil.createDocument();
@@ -557,21 +554,25 @@ public class AssertionUtil {
         return responseType.getAssertions().get(0).getAssertion();
     }
 
-    public static boolean isAssertionEncrypted(ResponseType responseType) throws ProcessingException {
+    public static boolean isAssertionsEncrypted(ResponseType responseType) throws ProcessingException {
         List<ResponseType.RTChoiceType> assertions = responseType.getAssertions();
 
         if (assertions.isEmpty()) {
             throw new ProcessingException("No assertion from response.");
         }
 
-        ResponseType.RTChoiceType rtChoiceType = assertions.get(0);
-        return rtChoiceType.getEncryptedAssertion() != null;
+        for(ResponseType.RTChoiceType rtChoiceType  : assertions) {
+            if(rtChoiceType.getEncryptedAssertion() == null) {
+                return false;
+            }
+        }        
+        return true;
     }
 
     /**
      * This method modifies the given responseType, and replaces the encrypted assertion with a decrypted version.
-     *
-     * It returns the assertion element as it was decrypted. This can be used in sginature verification.
+     * @param responseType a response containg an encrypted assertion
+     * @return the assertion element as it was decrypted. This can be used in signature verification.
      */
     public static Element decryptAssertion(ResponseType responseType, PrivateKey privateKey) throws ParsingException, ProcessingException, ConfigurationException {
         SAML2Response saml2Response = new SAML2Response();

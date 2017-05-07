@@ -409,7 +409,22 @@ public class XMLSignatureUtil {
 
         return doc;
     }
+    
+    /**
+     * 
+     * Check whether a document is has XML elements for signatures.
+     * 
+     */
 
+    public static boolean isSigned(Document signedDoc) {
+        NodeList nl = signedDoc.getElementsByTagNameNS(XMLSignature.XMLNS, "Signature");
+
+        if (nl == null || nl.getLength() == 0) {
+            return false;
+        }
+        return true;
+    }
+    
     /**
      * Validate a signed document with the given public key. All elements that contain a Signature are checked,
      * this way both assertions and the containing document are verified when signed.

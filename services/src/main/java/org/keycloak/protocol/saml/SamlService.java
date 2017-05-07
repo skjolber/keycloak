@@ -580,7 +580,7 @@ public class SamlService extends AuthorizationEndpointBase {
         return StringPropertyReplacer.replaceProperties(template, props);
     }
 
-    private static void addKeyInfo(StringBuilder target, RsaKeyMetadata key, String purpose) {
+    protected static void addKeyInfo(StringBuilder target, RsaKeyMetadata key, String purpose) {
         if (key == null) {
             return;
         }

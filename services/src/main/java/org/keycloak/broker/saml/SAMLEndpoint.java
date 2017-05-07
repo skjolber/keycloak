@@ -351,10 +351,10 @@ public class SAMLEndpoint {
                     return callback.error(relayState, Messages.IDENTITY_PROVIDER_UNEXPECTED_ERROR);
                 }
 
-                boolean assertionIsEncrypted = AssertionUtil.isAssertionEncrypted(responseType);
+                boolean assertionIsEncrypted = AssertionUtil.isAssertionsEncrypted(responseType);
 
                 if (config.isWantAssertionsEncrypted() && !assertionIsEncrypted) {
-                    logger.error("The assertion is not encrypted, which is required.");
+                    logger.error("The assertions are not encrypted, which is required.");
                     event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
                     event.error(Errors.INVALID_SAML_RESPONSE);
                     return ErrorPage.error(session, Messages.INVALID_REQUESTER);
@@ -371,13 +371,12 @@ public class SAMLEndpoint {
                     assertionElement = DocumentUtil.getElement(holder.getSamlDocument(), new QName(JBossSAMLConstants.ASSERTION.get()));
                 }
 
-                if (config.isWantAssertionsSigned() && config.isValidateSignature()) {
-                    if (!AssertionUtil.isSignatureValid(assertionElement, getIDPKeyLocator())) {
-                        logger.error("validation failed");
-                        event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
-                        event.error(Errors.INVALID_SIGNATURE);
-                        return ErrorPage.error(session, Messages.INVALID_REQUESTER);
-                    }
+                if ((config.isWantAssertionsSigned() && !XMLSignatureUtil.isSigned(assertionElement.getOwnerDocument()))
+                        || (config.isValidateSignature() && !AssertionUtil.isSignatureValid(assertionElement, getIDPKeyLocator()))) {
+                    logger.error("validation failed");
+                    event.event(EventType.IDENTITY_PROVIDER_RESPONSE);
+                    event.error(Errors.INVALID_SIGNATURE);
+                    return ErrorPage.error(session, Messages.INVALID_REQUESTER);
                 }
 
                 AssertionType assertion = responseType.getAssertions().get(0).getAssertion();
