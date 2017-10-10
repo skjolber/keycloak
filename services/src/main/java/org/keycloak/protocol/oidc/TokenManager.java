@@ -624,12 +624,12 @@ public class TokenManager {
         // TODO: Add better acr support. See KEYCLOAK-3314
         String acr = (AuthenticationManager.isSSOAuthentication(clientSession)) ? "0" : "1";
         token.setAcr(acr);
-
+        token.setAmr(token.getAmr());
+        
         String authTime = session.getNote(AuthenticationManager.AUTH_TIME);
         if (authTime != null) {
             token.setAuthTime(Integer.parseInt(authTime));
         }
-
 
         token.setSessionState(session.getId());
 

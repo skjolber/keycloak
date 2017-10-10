@@ -22,6 +22,7 @@ import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.AuthenticationFlowModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.ServicesLogger;
+import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.sessions.AuthenticationSessionModel;
 
 import javax.ws.rs.core.Response;
@@ -212,6 +213,13 @@ public class DefaultAuthenticationFlow implements AuthenticationFlow {
             case SUCCESS:
                 logger.debugv("authenticator SUCCESS: {0}", execution.getAuthenticator());
                 processor.getAuthenticationSession().setExecutionStatus(execution.getId(), AuthenticationSessionModel.ExecutionStatus.SUCCESS);
+                
+                String authMethods = processor.getUserSession().getNote(AuthenticationManager.AUTH_METHODS);
+                if(authMethods == null){
+                    authMethods = "";
+                }
+                processor.getUserSession().setNote(AuthenticationManager.AUTH_METHODS, authMethods + " " + execution.getAuthenticator());
+                
                 if (execution.isAlternative()) alternativeSuccessful = true;
                 return null;
             case FAILED:

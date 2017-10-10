@@ -86,6 +86,10 @@ public class AuthenticationManager {
 
     // userSession note with authTime (time when authentication flow including requiredActions was finished)
     public static final String AUTH_TIME = "AUTH_TIME";
+    
+    // userSession not with a list of used auth methods used for the current authentication
+    public static final String AUTH_METHODS = "AUTH_METHODS";
+    
     // clientSession note with flag that clientSession was authenticated through SSO cookie
     public static final String SSO_AUTH = "SSO_AUTH";
 
@@ -652,6 +656,7 @@ public class AuthenticationManager {
         } else {
             int authTime = Time.currentTime();
             userSession.setNote(AUTH_TIME, String.valueOf(authTime));
+            userSession.setNote(AUTH_METHODS, clientSession.getNote(AUTH_METHODS));
             clientSession.removeNote(SSO_AUTH);
         }
 
